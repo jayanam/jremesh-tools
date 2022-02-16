@@ -60,6 +60,7 @@ class JRT_OT_Remesh(Operator):
 
             remeshed_object.name = active_obj_name + '_rm'
 
+            remeshed_object.data.materials.clear()
             for mat in orig_object.data.materials:
                 remeshed_object.data.materials.append(mat)
 
@@ -72,22 +73,16 @@ class JRT_OT_Remesh(Operator):
 
             bpy.ops.mesh.customdata_custom_splitnormals_clear()
             
-            # bpy.ops.object.data_transfer(use_reverse_transfer=False,
-            #                              use_freeze=False, data_type='UV', use_create=True, vert_mapping='NEAREST',
-            #                              edge_mapping='NEAREST', loop_mapping='NEAREST_POLYNOR', poly_mapping='NEAREST',
-            #                              use_auto_transform=False, use_object_transform=True, use_max_distance=False,
-            #                              max_distance=1.0, ray_radius=0.0, islands_precision=0.1, layers_select_src='ACTIVE',
-            #                              layers_select_dst='ACTIVE', mix_mode='REPLACE', mix_factor=1.0)
-
             orig_object.hide_set(True)
-            select(remeshed_object)
 
-            os.remove(output)
+            select(remeshed_object)
 
             to_mode(mode)
 
-        except RuntimeError:
-            pass
+            os.remove(output)
+
+        except:
+            self.report({'ERROR'}, "JRemesh: An error occured")
         finally:
             self.report({'INFO'}, "JRemesh completed")
         return {'FINISHED'}

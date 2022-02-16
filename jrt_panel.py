@@ -44,4 +44,4 @@ class JRT_PT_Panel(Panel):
         # Start remesh
         row = layout.row()
         col = row.column()
-        col.operator('object.jrt_remesh_op', icon='MOD_BOOLEAN', text="Remesh")
+        col.operator('object.jrt_remesh_op', icon='VIEW_PERSPECTIVE', text="Remesh")
