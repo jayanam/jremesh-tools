@@ -1,3 +1,4 @@
+from msilib.schema import Error
 import bpy
 from bpy.types import Operator
 
@@ -81,9 +82,9 @@ class JRT_OT_Remesh(Operator):
 
             os.remove(output)
 
-        except:
-            self.report({'ERROR'}, "JRemesh: An error occured")
-        finally:
+        except BaseException as err:
+            self.report({'ERROR'}, "JRemesh: An error occured {0}".format(err))
+        else:
             self.report({'INFO'}, "JRemesh completed")
         return {'FINISHED'}
 

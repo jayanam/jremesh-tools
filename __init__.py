@@ -3,7 +3,7 @@ bl_info = {
     "author" : "jayanam",
     "description" : "Quad Remesh tools for Blender 2.8 - 3.x",
     "blender" : (2, 80, 0),
-    "version" : (0, 1, 3, 0),
+    "version" : (0, 1, 4, 0),
     "location" : "View3D",
     "warning" : "",
     "category" : "Object"
