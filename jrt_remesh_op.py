@@ -27,8 +27,12 @@ class JRT_OT_Remesh(Operator):
 
             to_object()
             
-            im_app = get_preferences().im_filepath
+            pref = get_preferences()
+            im_app = pref.im_filepath
 
+            if pref.im_in_blender_folder:
+                im_app = "Instant Meshes.exe"
+            
             if not os.path.isfile(im_app):
                 raise IOError("Path to Instant Meshes Application is missing.")
 
