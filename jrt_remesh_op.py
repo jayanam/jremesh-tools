@@ -16,15 +16,23 @@ class JRT_OT_Remesh(Operator):
     bl_label = "Quad remesh"
     bl_description = "Execute quad remesher" 
     bl_options = {'REGISTER', 'UNDO'} 
-         
+
+    @classmethod
+    def poll(cls, context):  
+        return context.active_object is not None
+
     def execute(self, context):
         try:
             mode = get_mode()
 
             to_object()
             
-            tmp_dir = tempfile.gettempdir()
             im_app = get_preferences().im_filepath
+
+            if not os.path.isfile(im_app):
+                raise IOError("Path to Instant Meshes Application is missing.")
+
+            tmp_dir = tempfile.gettempdir()
             orig = os.path.join(tmp_dir, 'orig_object.obj')
             output = os.path.join(tmp_dir, 'remeshed_object.obj')
 
@@ -76,14 +84,14 @@ class JRT_OT_Remesh(Operator):
             
             orig_object.hide_set(True)
 
-            select(remeshed_object)
+            make_active(remeshed_object)
 
             to_mode(mode)
 
             os.remove(output)
 
-        except BaseException as err:
-            self.report({'ERROR'}, "JRemesh: An error occured {0}".format(err))
+        except IOError as ioerr:
+            self.report({'ERROR'}, "JRemesh: {0}".format(ioerr))
         else:
             self.report({'INFO'}, "JRemesh completed")
         return {'FINISHED'}
