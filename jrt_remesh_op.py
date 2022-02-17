@@ -28,12 +28,13 @@ class JRT_OT_Remesh(Operator):
             to_object()
             
             pref = get_preferences()
-            im_app = pref.im_filepath
+
+            app_path = pref.im_filepath
 
             if pref.im_in_blender_folder:
-                im_app = "Instant Meshes.exe"
+                app_path = "Instant Meshes.exe"
             
-            if not os.path.isfile(im_app):
+            if not os.path.isfile(app_path):
                 raise IOError("Path to Instant Meshes Application is missing.")
 
             tmp_dir = tempfile.gettempdir()
@@ -44,6 +45,7 @@ class JRT_OT_Remesh(Operator):
 
             active_obj_name = context.active_object.name
 
+            # Export original object
             bpy.ops.export_scene.obj(filepath=orig,
                                         check_existing=False,
                                         axis_forward='-Z', axis_up='Y',
@@ -59,16 +61,16 @@ class JRT_OT_Remesh(Operator):
 
             options = self.build_options(context, output)
 
-            cmd = [im_app] + options + [orig]
+            self.do_remesh(app_path, orig, options)
 
-            subprocess.run(cmd)
-
+            # Import remeshed object
             bpy.ops.import_scene.obj(filepath=output,
                                      use_split_objects=False,
                                      use_smooth_groups=False,
                                      use_image_search=False,
                                      axis_forward='-Z', axis_up='Y')
 
+            # Post import remeshed object                    
             remeshed_object = bpy.context.selected_objects[0]
 
             remeshed_object.name = active_obj_name + '_rm'
@@ -100,11 +102,15 @@ class JRT_OT_Remesh(Operator):
             self.report({'INFO'}, "JRemesh completed")
         return {'FINISHED'}
 
+    def do_remesh(self, im_app, orig, options):
+        cmd = [im_app] + options + [orig]
+        subprocess.run(cmd)
+
     def build_options(self, context, output):
         options = ['-c', str(context.scene.crease),
-                       '-v', str(context.scene.vertex_count),
-                       '-S', str(context.scene.smooth),
-                       '-o', output]
+                   '-v', str(context.scene.vertex_count),
+                   '-S', str(context.scene.smooth),
+                   '-o', output]
 
         if context.scene.deterministic:
             options.append('-d')
