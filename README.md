@@ -8,3 +8,5 @@ Blender 2.8 - 3.x addon for quad remeshing. Currently it is a wrapper for instan
 
 ## Usage
 After installing the Panel JRemesher is available in the sidebar (Open by pressing N key).
+
+![JRemesher Addon UI](https://yt3.ggpht.com/kKI55RtmZ_JVg72pCJVVtFvHSFKy6GwXQarxodtXCO_3KHNabJRJ1i7vleadmYxK5UYz7f5taLnN=s640-nd-v1)
