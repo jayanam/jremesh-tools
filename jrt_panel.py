@@ -10,36 +10,51 @@ class JRT_PT_Panel(Panel):
     def draw(self, context):
        
         layout = self.layout
-        scene = context.scene
 
         # UI
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "deterministic")
+        # row = layout.row()
+        # col = row.column()
+        # col.prop(context.scene, "remesher")
+        
+        if context.scene.remesher == "Instant Meshes":
 
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "dominant")
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "deterministic")
 
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "intrinsic")
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "dominant")
 
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "boundaries")
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "intrinsic")
 
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "smooth")
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "boundaries")
 
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "crease")
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "smooth")
 
-        row = layout.row()
-        col = row.column()
-        col.prop(context.scene, "vertex_count")
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "crease")
+
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "vertex_count")
+
+        elif context.scene.remesher == "Quadriflow":
+
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "qf_sharp")
+
+            row = layout.row()
+            col = row.column()
+            col.prop(context.scene, "qf_face_count")
 
         # Start remesh
         row = layout.row()

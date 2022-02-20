@@ -21,92 +21,127 @@ class JRT_OT_Remesh(Operator):
     def poll(cls, context):  
         return context.active_object is not None
 
+    # def is_quadriflow(self, context):
+    #     return context.scene.remesher == "Quadriflow"
+
+    def is_instant_meshes(self, context):
+        return context.scene.remesher == "Instant Meshes"
+
+    def get_app_path(self, context):
+        pref = get_preferences()
+
+        if self.is_instant_meshes(context):
+            return pref.im_filepath
+
+        return None
+
+
+    def get_app_name(self, context):
+
+        if self.is_instant_meshes(context):
+            return "Instant Meshes"
+
+        return None
+
     def execute(self, context):
-        try:
-            mode = get_mode()
+        if self.is_instant_meshes(context):
+            try:
+                mode = get_mode()
 
-            to_object()
-            
-            pref = get_preferences()
+                to_object()
+                
+                app_name = self.get_app_name(context)
+                app_path = self.get_app_path(context)
 
-            app_path = pref.im_filepath
+                if not os.path.isfile(app_path):
+                    raise IOError(f"Path to {app_name} is missing.")
 
-            if pref.im_in_blender_folder:
-                app_path = "Instant Meshes.exe"
-            
-            if not os.path.isfile(app_path):
-                raise IOError("Path to Instant Meshes Application is missing.")
+                tmp_dir = tempfile.gettempdir()
+                orig = os.path.join(tmp_dir, 'orig_object.obj')
+                output = os.path.join(tmp_dir, 'remeshed_object.obj')
 
-            tmp_dir = tempfile.gettempdir()
-            orig = os.path.join(tmp_dir, 'orig_object.obj')
-            output = os.path.join(tmp_dir, 'remeshed_object.obj')
+                self.report({'INFO'}, "JRemesh started")
 
-            self.report({'INFO'}, "JRemesh started")
+                active_obj_name = context.active_object.name
 
-            active_obj_name = context.active_object.name
+                # Export original object
+                bpy.ops.export_scene.obj(filepath=orig,
+                                            check_existing=False,
+                                            use_selection=True,
+                                            use_mesh_modifiers=True,
+                                            use_edges=True,
+                                            use_smooth_groups=False,
+                                            use_smooth_groups_bitflags=False,
+                                            use_normals=True,
+                                            use_uvs=True )
 
-            # Export original object
-            bpy.ops.export_scene.obj(filepath=orig,
-                                        check_existing=False,
-                                        axis_forward='-Z', axis_up='Y',
-                                        use_selection=True,
-                                        use_mesh_modifiers=True,
-                                        use_edges=True,
+                orig_object = bpy.data.objects[active_obj_name]
+
+                self.do_remesh(app_path, orig, output, context)
+
+                # Import remeshed object
+                bpy.ops.import_scene.obj(filepath=output,
+                                        use_split_objects=False,
                                         use_smooth_groups=False,
-                                        use_smooth_groups_bitflags=False,
-                                        use_normals=True,
-                                        use_uvs=True )
+                                        use_image_search=False)
 
-            orig_object = bpy.data.objects[active_obj_name]
+                # Post import remeshed object                    
+                remeshed_object = bpy.context.selected_objects[0]
 
-            options = self.build_options(context, output)
+                remeshed_object.name = active_obj_name + '_rm'
 
-            self.do_remesh(app_path, orig, options)
+                remeshed_object.data.materials.clear()
+                for mat in orig_object.data.materials:
+                    remeshed_object.data.materials.append(mat)
 
-            # Import remeshed object
-            bpy.ops.import_scene.obj(filepath=output,
-                                     use_split_objects=False,
-                                     use_smooth_groups=False,
-                                     use_image_search=False,
-                                     axis_forward='-Z', axis_up='Y')
+                for edge in remeshed_object.data.edges:
+                    edge.use_edge_sharp = False
 
-            # Post import remeshed object                    
-            remeshed_object = bpy.context.selected_objects[0]
+                deselect_all()
 
-            remeshed_object.name = active_obj_name + '_rm'
+                select(remeshed_object)
 
-            remeshed_object.data.materials.clear()
-            for mat in orig_object.data.materials:
-                remeshed_object.data.materials.append(mat)
+                bpy.ops.object.shade_smooth()
 
-            for edge in remeshed_object.data.edges:
-                edge.use_edge_sharp = False
+                bpy.ops.mesh.customdata_custom_splitnormals_clear()
+                
+                orig_object.hide_set(True)
 
-            deselect_all()
+                make_active(remeshed_object)
 
-            select(remeshed_object)
+                to_mode(mode)
 
-            bpy.ops.mesh.customdata_custom_splitnormals_clear()
-            
-            orig_object.hide_set(True)
+                os.remove(output)
 
-            make_active(remeshed_object)
+            except IOError as ioerr:
+                self.report({'ERROR'}, "JRemesh: {0}".format(ioerr))
+            else:
+                self.report({'INFO'}, "JRemesh completed")
 
-            to_mode(mode)
-
-            os.remove(output)
-
-        except IOError as ioerr:
-            self.report({'ERROR'}, "JRemesh: {0}".format(ioerr))
-        else:
-            self.report({'INFO'}, "JRemesh completed")
         return {'FINISHED'}
 
-    def do_remesh(self, im_app, orig, options):
-        cmd = [im_app] + options + [orig]
+    def do_remesh(self, app_path, orig, output, context):
+
+        cmd = self.build_im_command(context, app_path, orig, output)
         subprocess.run(cmd)
 
-    def build_options(self, context, output):
+
+
+    # Quadriflow modifier can be called?
+    #
+    # def build_qf_command(self, context, app_path, orig, output):
+    #     options= []
+
+    #     if context.scene.qf_sharp:
+    #         options.append('-sharp')
+
+    #     options.extend(['-i', orig,
+    #                '-o', output,
+    #                '-f', str(context.scene.qf_face_count)])
+
+    #     return [app_path] + options
+
+    def build_im_command(self, context, app_path, orig, output):
         options = ['-c', str(context.scene.crease),
                    '-v', str(context.scene.vertex_count),
                    '-S', str(context.scene.smooth),
@@ -120,4 +155,5 @@ class JRT_OT_Remesh(Operator):
             options.append('-i')
         if context.scene.boundaries:
             options.append('-b')
-        return options
+
+        return [app_path] + options + [orig]
