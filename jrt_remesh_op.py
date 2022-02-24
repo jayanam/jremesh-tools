@@ -1,4 +1,3 @@
-from msilib.schema import Error
 import bpy
 from bpy.types import Operator
 
