@@ -24,7 +24,7 @@ class JRemeshPrefs(AddonPreferences):
         layout = self.layout
 
         row = self.layout.row()
-        row.label(text="Instant Meshes Application (exe)")
+        row.label(text="Instant Meshes Application")
         row.prop(self, 'im_filepath', text='')
 
         # row = self.layout.row()

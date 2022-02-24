@@ -20,8 +20,8 @@ class JRT_OT_Remesh(Operator):
     def poll(cls, context):  
         return context.active_object is not None
 
-    # def is_quadriflow(self, context):
-    #     return context.scene.remesher == "Quadriflow"
+    def is_quadriflow(self, context):
+        return context.scene.remesher == "Quadriflow"
 
     def is_instant_meshes(self, context):
         return context.scene.remesher == "Instant Meshes"
@@ -43,6 +43,8 @@ class JRT_OT_Remesh(Operator):
         return None
 
     def execute(self, context):
+
+        # Instant meshes remesher is used
         if self.is_instant_meshes(context):
             try:
                 mode = get_mode()
@@ -116,6 +118,10 @@ class JRT_OT_Remesh(Operator):
                 self.report({'ERROR'}, "JRemesh: {0}".format(ioerr))
             else:
                 self.report({'INFO'}, "JRemesh completed")
+
+        # Quadriflow remesher is used
+        elif self.is_quadriflow(context):
+            pass
 
         return {'FINISHED'}
 
