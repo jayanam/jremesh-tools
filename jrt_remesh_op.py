@@ -168,7 +168,7 @@ class JRT_OT_Remesh(Operator):
                 if m.type == "TRIANGULATE":
                     return
 
-        bpy.ops.object.modifier_add(type='TRIANGULATE')
+            bpy.ops.object.modifier_add(type='TRIANGULATE')
 
     def try_make_manifold(self, scn):
         if scn.rm_fill_holes:
