@@ -18,7 +18,7 @@ class JRT_OT_Remesh(Operator):
 
     @classmethod
     def poll(cls, context):  
-        return context.active_object is not None
+        return len(context.selected_objects) > 0
 
     def is_blender_quadriflow(self, context):
         return context.scene.remesher == "Blender Quadriflow"
@@ -53,7 +53,7 @@ class JRT_OT_Remesh(Operator):
 
         to_object()
 
-        self.try_triangulate(scn)
+        self.try_triangulate(context)
 
         active_obj_name = context.active_object.name
 
@@ -125,29 +125,35 @@ class JRT_OT_Remesh(Operator):
         # Quadriflow remesher is used
         elif self.is_blender_quadriflow(context):
 
-            # Duplicate active mesh
-            bpy.ops.object.duplicate()
+            try:
 
-            orig_object = bpy.data.objects[active_obj_name]
+                # Duplicate active mesh
+                bpy.ops.object.duplicate()
 
-            bpy.ops.object.quadriflow_remesh(
-                use_mesh_symmetry=scn.qf_use_mesh_sym, 
-                use_preserve_sharp=scn.qf_preserve_sharp,
-                use_preserve_boundary=scn.qf_preserve_mesh_boundary,
-                preserve_paint_mask=scn.qf_preserve_paint_mask,
-                smooth_normals=scn.qf_smooth_normals,
-                target_faces=scn.qf_face_count
-                )
+                orig_object = bpy.data.objects[active_obj_name]
 
-            orig_object.hide_set(True)
+                bpy.ops.object.quadriflow_remesh(
+                    use_mesh_symmetry=scn.qf_use_mesh_sym, 
+                    use_preserve_sharp=scn.qf_preserve_sharp,
+                    use_preserve_boundary=scn.qf_preserve_mesh_boundary,
+                    preserve_paint_mask=scn.qf_preserve_paint_mask,
+                    smooth_normals=scn.qf_smooth_normals,
+                    target_faces=scn.qf_face_count
+                    )
 
-            context.active_object.name = active_obj_name + "_rm"
+                orig_object.hide_set(True)
 
-            # Remove modifiers if triangulate was set
-            if scn.rm_triangulate:
-                context.active_object.modifiers.clear()
+                new_name = active_obj_name + "_rm"
+                get_active().name = new_name
 
-            self.report({'INFO'}, "JRemesh completed")  
+                # Remove modifiers if triangulate was set
+                if scn.rm_triangulate:
+                    get_active().modifiers.clear()
+
+            except RuntimeError as re:
+                self.report({'ERROR'}, "JRemesh: {0}".format(re))
+            else:
+                self.report({'INFO'}, "JRemesh completed")  
 
         self.try_make_manifold(scn)
 
@@ -155,9 +161,14 @@ class JRT_OT_Remesh(Operator):
 
         return {'FINISHED'}
 
-    def try_triangulate(self, scn):
-        if scn.rm_triangulate:
-            bpy.ops.object.modifier_add(type='TRIANGULATE')
+    def try_triangulate(self, context):
+
+        if context.scene.rm_triangulate:
+            for m in get_active().modifiers:
+                if m.type == "TRIANGULATE":
+                    return
+
+        bpy.ops.object.modifier_add(type='TRIANGULATE')
 
     def try_make_manifold(self, scn):
         if scn.rm_fill_holes:
