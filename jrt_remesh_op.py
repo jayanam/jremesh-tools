@@ -20,8 +20,8 @@ class JRT_OT_Remesh(Operator):
     def poll(cls, context):  
         return context.active_object is not None
 
-    def is_quadriflow(self, context):
-        return context.scene.remesher == "Quadriflow"
+    def is_blender_quadriflow(self, context):
+        return context.scene.remesher == "Blender Quadriflow"
 
     def is_instant_meshes(self, context):
         return context.scene.remesher == "Instant Meshes"
@@ -45,12 +45,21 @@ class JRT_OT_Remesh(Operator):
     def execute(self, context):
 
         # Instant meshes remesher is used
+        self.report({'INFO'}, "JRemesh started")
+
+        scn = context.scene
+
+        mode = get_mode()
+
+        to_object()
+
+        self.try_triangulate(scn)
+
+        active_obj_name = context.active_object.name
+
         if self.is_instant_meshes(context):
             try:
-                mode = get_mode()
-
-                to_object()
-                
+               
                 app_name = self.get_app_name(context)
                 app_path = self.get_app_path(context)
 
@@ -60,10 +69,6 @@ class JRT_OT_Remesh(Operator):
                 tmp_dir = tempfile.gettempdir()
                 orig = os.path.join(tmp_dir, 'orig_object.obj')
                 output = os.path.join(tmp_dir, 'remeshed_object.obj')
-
-                self.report({'INFO'}, "JRemesh started")
-
-                active_obj_name = context.active_object.name
 
                 # Export original object
                 bpy.ops.export_scene.obj(filepath=orig,
@@ -102,15 +107,13 @@ class JRT_OT_Remesh(Operator):
 
                 select(remeshed_object)
 
-                bpy.ops.object.shade_smooth()
+                bpy.ops.object.shade_flat()
 
                 bpy.ops.mesh.customdata_custom_splitnormals_clear()
                 
                 orig_object.hide_set(True)
 
                 make_active(remeshed_object)
-
-                to_mode(mode)
 
                 os.remove(output)
 
@@ -120,10 +123,48 @@ class JRT_OT_Remesh(Operator):
                 self.report({'INFO'}, "JRemesh completed")
 
         # Quadriflow remesher is used
-        elif self.is_quadriflow(context):
-            pass
+        elif self.is_blender_quadriflow(context):
+
+            # Duplicate active mesh
+            bpy.ops.object.duplicate()
+
+            orig_object = bpy.data.objects[active_obj_name]
+
+            bpy.ops.object.quadriflow_remesh(
+                use_mesh_symmetry=scn.qf_use_mesh_sym, 
+                use_preserve_sharp=scn.qf_preserve_sharp,
+                use_preserve_boundary=scn.qf_preserve_mesh_boundary,
+                preserve_paint_mask=scn.qf_preserve_paint_mask,
+                smooth_normals=scn.qf_smooth_normals,
+                target_faces=scn.qf_face_count
+                )
+
+            orig_object.hide_set(True)
+
+            context.active_object.name = active_obj_name + "_rm"
+
+            # Remove modifiers if triangulate was set
+            if scn.rm_triangulate:
+                context.active_object.modifiers.clear()
+
+            self.report({'INFO'}, "JRemesh completed")  
+
+        self.try_make_manifold(scn)
+
+        to_mode(mode)
 
         return {'FINISHED'}
+
+    def try_triangulate(self, scn):
+        if scn.rm_triangulate:
+            bpy.ops.object.modifier_add(type='TRIANGULATE')
+
+    def try_make_manifold(self, scn):
+        if scn.rm_fill_holes:
+            to_edit()
+            select_mesh()
+            bpy.ops.mesh.fill_holes()
+            deselect_mesh()
 
     def do_remesh(self, app_path, orig, output, context):
 

@@ -12,49 +12,61 @@ class JRT_PT_Panel(Panel):
         layout = self.layout
 
         # UI
-        # row = layout.row()
-        # col = row.column()
-        # col.prop(context.scene, "remesher")
+        row = layout.row()
+        split = row.split(factor=0.4)
+        col = split.column()
+        col.label(text="Remesher")
+        col = split.column()
+        col.prop(context.scene, "remesher", text="")
         
         if context.scene.remesher == "Instant Meshes":
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "deterministic")
+            row.prop(context.scene, "deterministic")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "dominant")
+            row.prop(context.scene, "dominant")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "intrinsic")
+            row.prop(context.scene, "intrinsic")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "boundaries")
+            row.prop(context.scene, "boundaries")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "smooth")
+            row.prop(context.scene, "smooth")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "crease")
+            row.prop(context.scene, "crease")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "vertex_count")
+            row.prop(context.scene, "vertex_count")
 
-        elif context.scene.remesher == "Quadriflow":
+        elif context.scene.remesher == "Blender Quadriflow":
+ 
+            row = layout.row()
+            row.prop(context.scene, "qf_use_mesh_sym")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "qf_sharp")
+            row.prop(context.scene, "qf_preserve_sharp")
 
             row = layout.row()
-            col = row.column()
-            col.prop(context.scene, "qf_face_count")
+            row.prop(context.scene, "qf_preserve_mesh_boundary")
+
+            row = layout.row()
+            row.prop(context.scene, "qf_preserve_paint_mask")
+
+            row = layout.row()
+            row.prop(context.scene, "qf_smooth_normals")
+
+            row = layout.row()
+            row.prop(context.scene, "qf_face_count")
+
+        row = layout.row()
+        row.prop(context.scene, "rm_triangulate")
+
+        row = layout.row()
+        row.prop(context.scene, "rm_fill_holes")
 
         # Start remesh
         row = layout.row()

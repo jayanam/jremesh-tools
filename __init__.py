@@ -3,7 +3,7 @@ bl_info = {
     "author" : "jayanam",
     "description" : "Quad Remesh tools for Blender 2.8 - 3.x",
     "blender" : (2, 80, 0),
-    "version" : (0, 3, 0, 2),
+    "version" : (0, 3, 2, 0),
     "location" : "View3D",
     "warning" : "",
     "category" : "Object"
@@ -16,8 +16,8 @@ from . jrt_panel import JRT_PT_Panel
 from . jrt_remesh_op import JRT_OT_Remesh
 from . jrt_pref import JRemeshPrefs
 
-remesher_items = [ ("Instant Meshes", "Instant Meshes", "", 0)
-                   # ("Quadriflow", "Quadriflow", "", 1)
+remesher_items = [ ("Instant Meshes", "Instant Meshes", "", 0),
+                   ("Blender Quadriflow", "Blender Quadriflow", "", 1)
                  ]
 
 bpy.types.Scene.remesher = bpy.props.EnumProperty(items=remesher_items, 
@@ -40,9 +40,22 @@ bpy.types.Scene.crease = bpy.props.IntProperty(name="Crease Degree", description
 bpy.types.Scene.smooth = bpy.props.IntProperty(name="Smooth iterations", description="Number of smoothing & ray tracing reprojection steps", default=2, min=0, max=10)
 
 # Scene properties Quadriflow
-# bpy.types.Scene.qf_sharp = bpy.props.BoolProperty(name="Sharp", description="Detect sharp edges", default = True)
+bpy.types.Scene.qf_use_mesh_sym = bpy.props.BoolProperty(name="Use Mesh Symmetry", description="Generates a symmetrical mesh using the Mesh Symmetry options.", default = False)
 
-# bpy.types.Scene.qf_face_count = bpy.props.IntProperty(name="Face Count", description="Desired number of faces for output mesh", default=2000, min=10, max=500000)
+bpy.types.Scene.qf_preserve_sharp = bpy.props.BoolProperty(name="Preserve Sharp", description="Tells the algorithm to try to preserve sharp features of the mesh. Enabling this could make the operator slower depending on the complexity of the mesh.", default = True)
+
+bpy.types.Scene.qf_preserve_mesh_boundary = bpy.props.BoolProperty(name="Preserve Mesh Boundary", description="Tells the algorithm to try to preserve the original volume of the mesh. Enabling this could make the operator slower depending on the complexity of the mesh.", default = False)
+
+bpy.types.Scene.qf_preserve_paint_mask = bpy.props.BoolProperty(name="Preserve Paint Mask", description="Reprojects the Paint Mask onto the new mesh.", default = False)
+
+bpy.types.Scene.qf_smooth_normals = bpy.props.BoolProperty(name="Smooth Normals", description="Applies the Smooth Normals operator to the resulting mesh.", default = False)
+
+bpy.types.Scene.qf_face_count = bpy.props.IntProperty(name="Number of Faces", description="Input target number of faces in the new mesh.", default=2000, min=1, max=1000000)
+
+# Common properties
+bpy.types.Scene.rm_triangulate = bpy.props.BoolProperty(name="Triangulate", description="Add a triangulate modifier to the mesh before remeshing", default = False)
+
+bpy.types.Scene.rm_fill_holes = bpy.props.BoolProperty(name="Fill holes", description="Try to fill the holes after remeshig (make manifold)", default = False)
 
 
 addon_keymaps = []
