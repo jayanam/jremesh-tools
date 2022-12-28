@@ -1,6 +1,6 @@
 bl_info = {
     "name" : "JRemesh Tools",
-    "author" : "jayanam",
+    "author" : "jayanam, Kevin C. Burke (@blastframe)",
     "description" : "Quad Remesh tools for Blender 2.8 - 3.x",
     "blender" : (2, 80, 0),
     "version" : (0, 3, 2, 2),
