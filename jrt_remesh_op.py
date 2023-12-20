@@ -71,25 +71,24 @@ class JRT_OT_Remesh(Operator):
                 output = os.path.join(tmp_dir, 'remeshed_object.obj')
 
                 # Export original object
-                bpy.ops.export_scene.obj(filepath=orig,
-                                            check_existing=False,
-                                            use_selection=True,
-                                            use_mesh_modifiers=True,
-                                            use_edges=True,
-                                            use_smooth_groups=False,
-                                            use_smooth_groups_bitflags=False,
-                                            use_normals=True,
-                                            use_uvs=True )
+                bpy.ops.wm.obj_export(filepath=orig,
+                                            export_selected_objects=True,
+                                            apply_modifiers=True,
+                                            export_uv=True,
+                                            export_normals=True,
+                                            export_colors=True,
+                                            )
 
                 orig_object = bpy.data.objects[active_obj_name]
 
                 self.do_remesh(app_path, orig, output, context)
 
                 # Import remeshed object
-                bpy.ops.import_scene.obj(filepath=output,
-                                        use_split_objects=False,
-                                        use_smooth_groups=False,
-                                        use_image_search=False)
+                bpy.ops.wm.obj_import(filepath=output,
+                                            use_split_objects=False,
+                                            use_split_groups=False,
+                                            import_vertex_groups=False,
+                                            validate_meshes=False)
 
                 # Post import remeshed object                    
                 remeshed_object = bpy.context.selected_objects[0]
