@@ -1,5 +1,5 @@
 # JRemesh Tools
-Blender 2.8 - 3.x addon for quad remeshing. Currently it is a wrapper for instant meshes, but will support other remeshers in the future.
+Blender 3.x-4.x addon for quad remeshing. Currently it is a wrapper for Instant Meshes.
 
 ## Install
 1. Download Instant Meshes: https://github.com/wjakob/instant-meshes

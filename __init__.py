@@ -1,9 +1,9 @@
 bl_info = {
     "name" : "JRemesh Tools",
-    "author" : "jayanam",
-    "description" : "Quad Remesh tools for Blender 2.8 - 3.x",
-    "blender" : (2, 80, 0),
-    "version" : (0, 3, 2, 2),
+    "author" : "jayanam, draise",
+    "description" : "Quad Remesh tools for Blender 4.x",
+    "blender" : (4, 0, 0),
+    "version" : (0, 3, 2, 3),
     "location" : "View3D",
     "warning" : "",
     "category" : "Object"
