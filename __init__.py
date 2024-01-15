@@ -1,9 +1,9 @@
 bl_info = {
     "name" : "JRemesh Tools",
     "author" : "jayanam",
-    "description" : "Quad Remesh tools for Blender 2.8 - 3.x",
+    "description" : "Quad Remesh tools for Blender 2.8 - 4.x",
     "blender" : (2, 80, 0),
-    "version" : (0, 3, 2, 2),
+    "version" : (4, 0, 0, 1),
     "location" : "View3D",
     "warning" : "",
     "category" : "Object"
@@ -21,8 +21,8 @@ remesher_items = [ ("Instant Meshes", "Instant Meshes", "", 0),
                  ]
 
 bpy.types.Scene.remesher = bpy.props.EnumProperty(items=remesher_items, 
-                                                   name="Remesher",
-                                                   default="Instant Meshes")
+                                                  name="Remesher",
+                                                  default="Instant Meshes")
 
 # Scene properties Instant Meshes
 bpy.types.Scene.deterministic = bpy.props.BoolProperty(name="Deterministic", description="Prefer (slower) deterministic algorithms", default = False)
